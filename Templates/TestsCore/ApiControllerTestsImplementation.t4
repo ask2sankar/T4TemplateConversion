@@ -1,0 +1,57 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="$(binDir)AMF.Tools.Core.dll" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="AMF.Tools.Core" #>
+<#@ import namespace="AMF.Tools.Core.WebApiGenerator" #>
+<#@ import namespace="System.Linq" #>
+<#@ parameter name="controllerObject" type="AMF.Tools.Core.WebApiGenerator.ControllerObject" #>
+<#@ parameter name="hasModels" type="System.Boolean" #>
+<#@ parameter name="useAsyncMethods" type="System.Boolean" #>
+<#@ parameter name="apiVersion" type="System.String" #>
+<#@ parameter name="testsNamespace" type="System.String" #>
+<#@ output extension=".cs" #>
+
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using $(namespace);
+<# if(hasModels){ #>
+using $(namespace).Models;
+<# } #>
+
+namespace <#= testsNamespace #>
+{
+<# if(System.String.IsNullOrWhiteSpace(apiVersion)) { #>
+    public class <#= controllerObject.Name #>ControllerTestsImplementation
+<# } else { #>
+    public class <#= apiVersion #><#= controllerObject.Name #>ControllerTestsImplementation
+<# } #>
+    {
+
+<#
+		foreach (var method in controllerObject.Methods)
+		{
+#>
+        // Mock controller depenencies for method <#= method.Name #>
+<# if(!System.String.IsNullOrWhiteSpace(apiVersion)) { #>
+        internal <#= apiVersion #><#= controllerObject.Name #> <#= method.Name #>Arrange(<#= apiVersion #><#= controllerObject.Name #> controller)
+<# } else { #>
+        internal <#= controllerObject.Name #>Controller <#= method.Name #>Arrange(<#= controllerObject.Name #>Controller controller)
+<# } #>
+        {
+            // TODO: mock dependencies
+            return controller;
+        }
+
+        // Custom Assertions for method <#= method.Name #>Test
+        internal void <#= method.Name #>Assert(IActionResult result)
+        {
+            // Additional Asserts
+        }
+<#
+
+		} // end foreach method
+#>
+    }
+}
